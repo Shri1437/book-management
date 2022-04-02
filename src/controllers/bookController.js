@@ -121,7 +121,7 @@ const createBook = async function (req, res) {
     }
 }
 
-
+// get book by filter
 
 const getBook = async (req, res) => {
     try {
@@ -139,7 +139,7 @@ const getBook = async (req, res) => {
 
 }
 
-
+// get book by ID
 const getById = async (req, res) => {
     try {
         const bookId = req.params.bookId //if we use params to find we use params name
@@ -161,7 +161,7 @@ const getById = async (req, res) => {
 
         }
 
-        return res.status(200).send({ status: true,msg:"book details", data: findBook })
+        return res.status(200).send({ status: true, msg: "book details", data: findBook })
 
     }
     catch (err) {
@@ -169,6 +169,9 @@ const getById = async (req, res) => {
     }
 }
 
+
+
+//update book
 const update = async (req, res) => {
     try {
         const body = req.params.bookId
@@ -193,45 +196,60 @@ const update = async (req, res) => {
 
         const { title, excerpt, releasedAt, ISBN } = data
 
-        if (!isValid(title)) {
-            return res.status(400).send({ status: false, msg: "please enter valid title" })
-        }
-        if (!isValid(excerpt)) {
-            return res.status(400).send({ status: false, msg: "please enter valid excerpt" })
-        }
-        if (!isValid(releasedAt)) {
-            return res.status(400).send({ status: false, msg: "please enter valid releasedAt" })
+        if (title) {
+
+            if (!isValid(title)) {
+                return res.status(400).send({ status: false, msg: "please enter valid title" })
+            }
+            const duplicateTitle = await bookModel.findOne({ title: title, isDeleted: false })
+
+            if (duplicateTitle) {
+                return res.status(404).send({ status: false, msg: "title already exist " })
+            }
         }
 
-        if (!(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) {
-            return res.status(400).send({ status: false, message: `${releasedAt} is invalid format, please enter date in YYYY-MM-DD format` })
-           
-        }
-        if (!isValid(ISBN)) {
-            return res.status(400).send({ status: false, msg: "please enter valid ISBN" })
-        }
+        if(excerpt){
+            if (!isValid(excerpt)) {
+                return res.status(400).send({ status: false, msg: "please enter valid excerpt" })
+            }
 
-        if (!/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/g.test(ISBN)) {
-            return res.status(400).send({ status: false, message: `enter a valid format of ISBN` })
         }
 
-        const duplicate = await bookModel.findOne({ title: title, isDeleted: false })
+        if (releasedAt) {
+            if (!isValid(releasedAt)) {
+                return res.status(400).send({ status: false, msg: "please enter valid releasedAt" })
+            }
 
-        const duplicateISBN = await bookModel.findOne({ ISBN: ISBN, isDeleted: false })
+            if (!(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) {
+                return res.status(400).send({ status: false, message: `${releasedAt} is invalid format, please enter date in YYYY-MM-DD format` })
 
-        if (duplicate) {
-            return res.status(404).send({ status: false, msg: "title already exist " })
+            }
         }
 
-        if (duplicateISBN) {
-            return res.status(404).send({ status: false, msg: "ISBN already exist " })
-        }
 
+        if (ISBN) {
+
+            if (!isValid(ISBN)) {
+                return res.status(400).send({ status: false, msg: "please enter valid ISBN" })
+            }
+            if (!/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/g.test(ISBN)) {
+                return res.status(400).send({ status: false, message: `enter a valid format of ISBN` })
+            }
+
+            const duplicateISBN = await bookModel.findOne({ ISBN: ISBN, isDeleted: false })
+
+            if (duplicateISBN) {
+                return res.status(404).send({ status: false, msg: "ISBN already exist " })
+            }
+
+
+        }
         const updatedData = await bookModel.findOneAndUpdate({ _id: body, isDeleted: false }, data, { new: true })
 
         if (!updatedData) {
             return res.status(404).send({ status: false, msg: " No such data found" })
         }
+
         return res.status(200).send({ status: true, msg: "Updated data successfully", data: updatedData })
 
     }
@@ -240,6 +258,8 @@ const update = async (req, res) => {
     }
 }
 
+
+//delete book by id
 const deleteById = async (req, res) => {
     try {
 

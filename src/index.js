@@ -2,10 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const route = require('./routes/route.js');
 const { default: mongoose } = require('mongoose');
+const multer = require('multer');  //multer require
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(multer().any())
 
 
 mongoose.connect("mongodb+srv://hksinha01:20011997hk@test.cdgzs.mongodb.net/group5Database", {

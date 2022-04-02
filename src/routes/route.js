@@ -1,34 +1,40 @@
 const express = require('express');
 const router = express.Router();
+
+const aws = require('aws-sdk')
+
 const UserController = require("../controllers/userController")
 
-const mid=require("../middlware/middlware")
+const mid = require("../middlware/middlware")
 
-const reviewController=require("../controllers/reviewController")
+const reviewController = require("../controllers/reviewController")
 
-const bookController=require("../controllers/bookController");
+const bookController = require("../controllers/bookController");
 const { route } = require('express/lib/application');
-// const internController=require("../controllers/internController")
 
-router.post('/register',UserController.CreateUser)
 
-router.post("/login",UserController.logIn)
+//some improtant data 
+router.post('/register', UserController.CreateUser)
 
-router.post("/books",mid.authentication,bookController.createBook)
+router.post("/login", UserController.logIn)
 
-router.get("/books",mid.authentication,bookController.getBook)
+router.post("/books", mid.authentication, bookController.createBook)
 
-router.post("/books/:bookId/review",reviewController.createPost)
+router.get("/books", mid.authentication, bookController.getBook)
 
-router.get("/books/:bookId",mid.authentication,bookController.getById)
+router.post("/books/:bookId/review", reviewController.createPost)
 
-router.put("/books/:bookId",mid.authentication,mid.authorization,bookController.update)
+router.get("/books/:bookId", mid.authentication, bookController.getById)
 
-router.delete("/books/:bookId",mid.authentication,mid.authorization,bookController.deleteById)
+router.put("/books/:bookId", mid.authentication, mid.authorization, bookController.update)
 
-router.put("/books/:bookId/review/:reviewId",reviewController.updataReview)
+router.delete("/books/:bookId", mid.authentication, mid.authorization, bookController.deleteById)
 
-router.delete("/books/:bookId/review/:reviewId",reviewController.deletedReviewById)
+router.put("/books/:bookId/review/:reviewId", reviewController.updataReview)
+
+router.delete("/books/:bookId/review/:reviewId", reviewController.deletedReviewById)
+
+
 
 
 module.exports = router
